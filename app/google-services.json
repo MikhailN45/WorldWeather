@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "62553446816",
+    "project_id": "worldweat",
+    "storage_bucket": "worldweat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62553446816:android:97c9f5708a8c1a3bf4acc5",
+        "android_client_info": {
+          "package_name": "com.naumov.worldweather"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkxkql2mm5whI8BucPH6dInMR_HlLQJ0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

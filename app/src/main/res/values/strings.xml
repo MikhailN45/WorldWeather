@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WorldWeather</string>
+    <string name="current_cloudiness">current cloudiness</string>
+    <string name="humidity">humidity</string>
+    <string name="pressure">pressure</string>
+    <string name="wind">wind</string>
+    <string name="sunrise_and_sunset_time">sunrise and sunset time</string>
+    <string name="current_location">Текущее местоположение</string>
+    <string name="hourly_forecast">Почасовой прогноз</string>
+    <string name="weather_type_icon">weather type icon</string>
+</resources>
