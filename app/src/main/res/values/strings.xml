@@ -8,4 +8,12 @@
     <string name="current_location">Текущее местоположение</string>
     <string name="hourly_forecast">Почасовой прогноз</string>
     <string name="weather_type_icon">weather type icon</string>
+    <string name="weekly_overcast_title">Прогноз на неделю</string>
+    <string name="day">День</string>
+    <string name="night">Ночь</string>
+    <string name="degree">%1$d°</string>
+    <string name="meter_in_seconds">%1$d м/с</string>
+    <string name="percent">%1$d%%</string>
+    <string name="millimeters_pressure"> %1$d мм.рт.ст.</string>
+    <string name="apparent_temperature">По ощущениям: %1$d°</string>
 </resources>

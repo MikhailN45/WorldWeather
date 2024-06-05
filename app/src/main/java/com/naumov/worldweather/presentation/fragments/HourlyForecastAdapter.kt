@@ -1,17 +1,18 @@
 package com.naumov.worldweather.presentation.fragments
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.HourlyForecastItemBinding
 import com.naumov.worldweather.domain.weather.WeatherData
 import java.time.format.DateTimeFormatter
 
-class ForecastAdapter(private val data: List<WeatherData>) :
-    RecyclerView.Adapter<ForecastAdapter.ViewHolder>() {
+class HourlyForecastAdapter(private val data: List<WeatherData>, private val context: Context) :
+    RecyclerView.Adapter<HourlyForecastAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: HourlyForecastItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -30,11 +31,11 @@ class ForecastAdapter(private val data: List<WeatherData>) :
 
     override fun getItemCount(): Int = data.size
 
-    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val weatherData = data[position]
         holder.date.text = weatherData.time.format(DateTimeFormatter.ofPattern("HH:mm"))
         holder.icon.setImageResource(weatherData.weatherType.iconRes)
-        holder.temperature.text = "${weatherData.temperatureCelsius.toInt()}°"
+        holder.temperature.text =
+            context.getString(R.string.degree, weatherData.temperatureCelsius.toInt())
     }
 }
