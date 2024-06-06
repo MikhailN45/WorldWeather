@@ -14,8 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.FragmentMainBinding
-import com.naumov.worldweather.domain.weather.DayWeatherData
-import com.naumov.worldweather.domain.weather.WeeklyForecast
+import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import java.time.LocalDateTime
@@ -26,8 +25,6 @@ class MainFragment : Fragment() {
     private val viewModel: WeatherViewModel by activityViewModels()
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    private val formatterDayMonth: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
     private val formatterHourMinute: DateTimeFormatter =
         DateTimeFormatter.ofPattern("HH:mm")
 
@@ -75,15 +72,15 @@ class MainFragment : Fragment() {
                     icWeatherType.setImageResource(weatherType.iconRes)
                 }
             }
-            swipeRefreshLayout.setOnRefreshListener { viewModel.loadWeatherInfo() }
+            swipeRefreshLayout.setOnRefreshListener { viewModel.processEvent(Event.RefreshData) }
             hourlyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
             hourlyForecastRecycler.adapter =
-                HourlyForecastAdapter(getDailyForecast(state), requireContext())
+                HourlyForecastAdapter(viewModel.getDailyForecast(state), requireContext())
             weeklyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
             weeklyForecastRecycler.adapter = state.weatherInfo?.weatherDataPerDay?.let {
-                WeeklyForecastAdapter(getWeeklyForecast(state), requireContext())
+                WeeklyForecastAdapter(viewModel.getWeeklyForecast(state), requireContext())
             }
         }
     }
@@ -97,31 +94,12 @@ class MainFragment : Fragment() {
                     location = geoList.first().locality ?: getString(R.string.current_location)
                 }
             } else {
-                val geoList: List<Address>? = geoCoder.getFromLocation(
-                    it.latitude, it.longitude, 1
-                )
+                @Suppress("DEPRECATION") val geoList: List<Address>? =
+                    geoCoder.getFromLocation(it.latitude, it.longitude, 1)
                 location = geoList?.first()?.locality ?: getString(R.string.current_location)
             }
         }
         return location
-    }
-
-    private fun getWeeklyForecast(state: WeatherState): List<WeeklyForecast> =
-        state.weatherInfo?.weatherDataPerDay?.values?.map { list ->
-            WeeklyForecast(
-                date = list.first().time.toLocalDate().format(formatterDayMonth),
-                dayTemperature = list.first { it.time.hour == 15 }.temperatureCelsius,
-                nightTemperature = list.first { it.time.hour == 3 }.temperatureCelsius,
-                weatherType = list.first().weatherType
-            )
-        } ?: emptyList()
-
-    private fun getDailyForecast(state: WeatherState): List<DayWeatherData> {
-        val nowHour = LocalDateTime.now().hour
-        val dayWeatherDataPerDay = state.weatherInfo?.weatherDataPerDay
-        val todayWeather = dayWeatherDataPerDay?.get(0)?.drop(nowHour)
-        val tomorrowWeather = dayWeatherDataPerDay?.get(1)?.take(nowHour)
-        return (todayWeather ?: emptyList()) + (tomorrowWeather ?: emptyList())
     }
 
     override fun onDestroy() {

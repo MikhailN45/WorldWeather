@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.ActivityMainBinding
+import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.ui.MainFragment
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,13 +28,13 @@ class MainActivity : AppCompatActivity() {
 
         permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
-        ) {
-            viewModel.loadWeatherInfo()
-        }
-        permissionLauncher.launch(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-        ))
+        ) { viewModel.processEvent(Event.RefreshData) }
+        permissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
+        )
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.activity_fragment_container, MainFragment.newInstance())
