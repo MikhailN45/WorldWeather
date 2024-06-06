@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.FragmentMainBinding
+import com.naumov.worldweather.domain.weather.DayWeatherData
 import com.naumov.worldweather.domain.weather.WeeklyForecast
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
@@ -64,21 +65,23 @@ class MainFragment : Fragment() {
                     currentWindText.text = getString(R.string.meter_in_seconds, windSpeed)
                     currentPressureText.text = getString(R.string.millimeters_pressure, pressure)
                     currentHumidityText.text = getString(R.string.percent, humidity)
-                    currentApparentTemperature.text = getString(R.string.feels_temp, feelsTemperature)
-                    updateTime.text = getString(R.string.update_time, LocalDateTime.now()
-                            .format(formatterHourMinute))
+                    currentApparentTemperature.text =
+                        getString(R.string.feels_temp, feelsTemperature)
+                    updateTime.text = getString(
+                        R.string.update_time, LocalDateTime.now()
+                            .format(formatterHourMinute)
+                    )
                     icWeatherType.setImageResource(weatherType.iconRes)
                 }
             }
             swipeRefreshLayout.setOnRefreshListener { viewModel.loadWeatherInfo() }
             hourlyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-            hourlyForecastRecycler.adapter = state.weatherInfo?.dayWeatherDataPerDay?.let {
-                HourlyForecastAdapter(it.getValue(0), requireContext())
-            }
+            hourlyForecastRecycler.adapter =
+                HourlyForecastAdapter(getDailyForecast(state), requireContext())
             weeklyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-            weeklyForecastRecycler.adapter = state.weatherInfo?.dayWeatherDataPerDay?.let {
+            weeklyForecastRecycler.adapter = state.weatherInfo?.weatherDataPerDay?.let {
                 WeeklyForecastAdapter(getWeeklyForecast(state), requireContext())
             }
         }
@@ -93,17 +96,17 @@ class MainFragment : Fragment() {
                     location = geoList.first().locality ?: getString(R.string.current_location)
                 }
             } else {
-               val geoList: List<Address>? = geoCoder.getFromLocation(
-                   it.latitude, it.longitude, 1
-               )
-               location = geoList?.first()?.locality ?: getString(R.string.current_location)
+                val geoList: List<Address>? = geoCoder.getFromLocation(
+                    it.latitude, it.longitude, 1
+                )
+                location = geoList?.first()?.locality ?: getString(R.string.current_location)
             }
         }
         return location
     }
 
     private fun getWeeklyForecast(state: WeatherState): List<WeeklyForecast> =
-        state.weatherInfo?.dayWeatherDataPerDay?.values?.map { list ->
+        state.weatherInfo?.weatherDataPerDay?.values?.map { list ->
             WeeklyForecast(
                 date = list.first().time.toLocalDate().format(formatterDayMonth),
                 dayTemperature = list.first { it.time.hour == 15 }.temperatureCelsius,
@@ -111,6 +114,14 @@ class MainFragment : Fragment() {
                 weatherType = list.first().weatherType
             )
         } ?: emptyList()
+
+    private fun getDailyForecast(state: WeatherState): List<DayWeatherData> {
+        val nowHour = LocalDateTime.now().hour
+        val dayWeatherDataPerDay = state.weatherInfo?.weatherDataPerDay
+        val todayWeather = dayWeatherDataPerDay?.get(0)?.drop(nowHour)
+        val tomorrowWeather = dayWeatherDataPerDay?.get(1)?.take(nowHour)
+        return (todayWeather ?: emptyList()) + (tomorrowWeather ?: emptyList())
+    }
 
     override fun onDestroy() {
         super.onDestroy()
