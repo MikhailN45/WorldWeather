@@ -13,7 +13,8 @@
     <string name="night">Ночь</string>
     <string name="degree">%1$d°</string>
     <string name="meter_in_seconds">%1$d м/с</string>
-    <string name="percent">%1$d%%</string>
+    <string name="percent">%1$d %%</string>
     <string name="millimeters_pressure"> %1$d мм.рт.ст.</string>
-    <string name="apparent_temperature">По ощущениям: %1$d°</string>
+    <string name="feels_temp">По ощущениям: %1$d°</string>
+    <string name="update_time">Обновлено в %1$s</string>
 </resources>

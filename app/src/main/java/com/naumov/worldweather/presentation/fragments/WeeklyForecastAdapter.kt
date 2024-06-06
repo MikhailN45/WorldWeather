@@ -35,7 +35,7 @@ class WeeklyForecastAdapter(private val data: List<WeeklyForecast>, private val 
         val weatherData = data[position]
         holder.date.text = weatherData.date
         holder.icon.setImageResource(weatherData.weatherType.iconRes)
-        holder.dayTemperature.text = context.getString(R.string.degree, weatherData.dayTemperature.toInt())
-        holder.nightTemperature.text = context.getString(R.string.degree, weatherData.nightTemperature.toInt())
+        holder.dayTemperature.text = context.getString(R.string.degree, weatherData.dayTemperature)
+        holder.nightTemperature.text = context.getString(R.string.degree, weatherData.nightTemperature)
     }
 }

@@ -1,0 +1,13 @@
+package com.naumov.worldweather.domain.weather
+
+import java.time.LocalDateTime
+
+data class DayWeatherData(
+    val time: LocalDateTime,
+    val temperatureCelsius: Int,
+    val humidity: Int,
+    val feelsTemperature: Int,
+    val pressure: Int,
+    val windSpeed: Int,
+    val weatherType: WeatherType
+)

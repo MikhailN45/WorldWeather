@@ -8,10 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.HourlyForecastItemBinding
-import com.naumov.worldweather.domain.weather.WeatherData
+import com.naumov.worldweather.domain.weather.DayWeatherData
 import java.time.format.DateTimeFormatter
 
-class HourlyForecastAdapter(private val data: List<WeatherData>, private val context: Context) :
+class HourlyForecastAdapter(private val data: List<DayWeatherData>, private val context: Context) :
     RecyclerView.Adapter<HourlyForecastAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: HourlyForecastItemBinding) :
@@ -35,7 +35,6 @@ class HourlyForecastAdapter(private val data: List<WeatherData>, private val con
         val weatherData = data[position]
         holder.date.text = weatherData.time.format(DateTimeFormatter.ofPattern("HH:mm"))
         holder.icon.setImageResource(weatherData.weatherType.iconRes)
-        holder.temperature.text =
-            context.getString(R.string.degree, weatherData.temperatureCelsius.toInt())
+        holder.temperature.text = context.getString(R.string.degree, weatherData.temperatureCelsius)
     }
 }

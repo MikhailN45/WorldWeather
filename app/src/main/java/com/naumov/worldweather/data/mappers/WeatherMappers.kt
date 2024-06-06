@@ -2,7 +2,7 @@ package com.naumov.worldweather.data.mappers
 
 import com.naumov.worldweather.data.remote.WeatherDataDto
 import com.naumov.worldweather.data.remote.WeatherDto
-import com.naumov.worldweather.domain.weather.WeatherData
+import com.naumov.worldweather.domain.weather.DayWeatherData
 import com.naumov.worldweather.domain.weather.WeatherInfo
 import com.naumov.worldweather.domain.weather.WeatherType
 import java.time.LocalDateTime
@@ -10,10 +10,10 @@ import java.time.format.DateTimeFormatter
 
 private data class IndexedWeatherData(
     val index: Int,
-    val data: WeatherData
+    val data: DayWeatherData
 )
 
-fun WeatherDataDto.toWeatherDataMap(): Map<Int, List<WeatherData>> {
+fun WeatherDataDto.toWeatherDataMap(): Map<Int, List<DayWeatherData>> {
     return time.mapIndexed { index, time ->
         val temperature = temperatures[index]
         val humidity = humidities[index]
@@ -23,13 +23,13 @@ fun WeatherDataDto.toWeatherDataMap(): Map<Int, List<WeatherData>> {
         val windSpeed = windSpeeds[index]
         IndexedWeatherData(
             index = index,
-            data = WeatherData(
+            data = DayWeatherData(
                 time = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME),
-                temperatureCelsius = temperature,
-                humidity = humidity,
-                apparentTemperature = apparentTemperature,
-                pressure = pressure,
-                windSpeed = windSpeed,
+                temperatureCelsius = temperature.toInt(),
+                humidity = humidity.toInt(),
+                feelsTemperature = apparentTemperature.toInt(),
+                pressure = (pressure*0.75).toInt(),
+                windSpeed = windSpeed.toInt(),
                 weatherType = WeatherType.fromWMO(weatherCode)
             )
         )
@@ -48,7 +48,7 @@ fun WeatherDto.toWeatherInfo(): WeatherInfo {
         it.time.hour == hour
     }
     return WeatherInfo(
-        weatherDataPerDay = weatherDataMap,
-        currentWeatherData = currentWeatherData
+        dayWeatherDataPerDay = weatherDataMap,
+        currentDayWeatherData = currentWeatherData
     )
 }

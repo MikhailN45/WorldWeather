@@ -13,6 +13,6 @@ interface WeatherApi {
     companion object{
         private const val WEEKLY_OVERCAST_ROUTE =
             "v1/forecast?hourly=temperature_2m,relative_humidity_2m,apparent_temperature," +
-                    "pressure_msl,weather_code,wind_speed_10m&wind_speed_unit=ms"
+                    "pressure_msl,weather_code,wind_speed_10m&wind_speed_unit=ms&timezone=auto"
     }
 }
