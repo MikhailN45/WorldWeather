@@ -1,4 +1,4 @@
-package com.naumov.worldweather.presentation.fragments
+package com.naumov.worldweather.presentation.ui
 
 import android.content.Context
 import android.view.LayoutInflater

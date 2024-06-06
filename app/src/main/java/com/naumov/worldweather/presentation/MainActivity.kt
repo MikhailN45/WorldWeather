@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.ActivityMainBinding
-import com.naumov.worldweather.presentation.fragments.MainFragment
+import com.naumov.worldweather.presentation.ui.MainFragment
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 

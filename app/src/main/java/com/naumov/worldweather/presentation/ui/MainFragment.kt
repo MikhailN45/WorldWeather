@@ -1,4 +1,4 @@
-package com.naumov.worldweather.presentation.fragments
+package com.naumov.worldweather.presentation.ui
 
 import android.location.Address
 import android.location.Geocoder
@@ -71,6 +71,7 @@ class MainFragment : Fragment() {
                         R.string.update_time, LocalDateTime.now()
                             .format(formatterHourMinute)
                     )
+                    weatherTypeText.text = weatherType.weatherDesc
                     icWeatherType.setImageResource(weatherType.iconRes)
                 }
             }
