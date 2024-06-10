@@ -14,7 +14,7 @@ sealed class WeatherType(
 
     data object MainlyClear : WeatherType(
         weatherDesc = "Небольшая облачность",
-        iconRes = R.drawable.ic_cloudy
+        iconRes = R.drawable.ic_sunnycloudy
     )
 
     data object PartlyCloudy : WeatherType(
@@ -24,7 +24,7 @@ sealed class WeatherType(
 
     data object Overcast : WeatherType(
         weatherDesc = "Пасмурно",
-        iconRes = R.drawable.ic_cloudy
+        iconRes = R.drawable.ic_very_cloudy
     )
 
     data object Foggy : WeatherType(

@@ -3,7 +3,7 @@ package com.naumov.worldweather.data.repository
 import com.naumov.worldweather.data.mappers.toWeatherInfo
 import com.naumov.worldweather.data.remote.WeatherApi
 import com.naumov.worldweather.domain.repository.WeatherRepository
-import com.naumov.worldweather.domain.util.Resource
+import com.naumov.worldweather.domain.util.Result
 import com.naumov.worldweather.domain.weather.WeatherInfo
 import javax.inject.Inject
 
@@ -11,9 +11,9 @@ class WeatherRepositoryImpl @Inject constructor(
     private val api: WeatherApi
 ) : WeatherRepository {
 
-    override suspend fun getWeatherData(lat: Double, long: Double): Resource<WeatherInfo> {
+    override suspend fun getWeatherData(lat: Double, long: Double): Result<WeatherInfo> {
         return try {
-            Resource.Success(
+            Result.Success(
                 data = api.getWeatherData(
                     lat = lat,
                     long = long
@@ -21,7 +21,7 @@ class WeatherRepositoryImpl @Inject constructor(
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            Resource.Error(e.message ?: "Unknown error!")
+            Result.Error(e.message ?: "Unknown error!")
         }
     }
 }

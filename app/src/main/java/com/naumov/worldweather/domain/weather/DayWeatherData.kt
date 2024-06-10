@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 data class DayWeatherData(
     val time: LocalDateTime,
-    val temperatureCelsius: Int,
+    val temperature: Int,
     val humidity: Int,
     val feelsTemperature: Int,
     val pressure: Int,

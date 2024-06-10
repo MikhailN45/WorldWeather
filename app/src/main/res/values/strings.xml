@@ -17,4 +17,15 @@
     <string name="millimeters_pressure"> %1$d мм.рт.ст.</string>
     <string name="feels_temp">По ощущениям: %1$d°</string>
     <string name="update_time">Обновлено в %1$s</string>
+    <string name="back_button">back button</string>
+    <string name="morning">Утро</string>
+    <string name="evening">Вечер</string>
+    <string name="apparent_as">По ощущениям</string>
+    <string name="wind_icon">wind icon</string>
+    <string name="wind_title">Ветер</string>
+    <string name="humidity_daily">Влажность</string>
+    <string name="pressure_daily">Давление</string>
+    <string name="millimeters">мм.рт.ст.</string>
+    <string name="temperature_daily">Температура</string>
+    <string name="forecast_date">Прогноз на %1$s</string>
 </resources>

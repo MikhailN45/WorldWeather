@@ -6,10 +6,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.ActivityMainBinding
 import com.naumov.worldweather.presentation.event.Event
-import com.naumov.worldweather.presentation.ui.MainFragment
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,9 +36,11 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.activity_fragment_container, MainFragment.newInstance())
-            .commit()
+        val navController =
+            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                .navController
+
+        navController.navigate(R.id.mainFragment)
     }
 
     override fun onDestroy() {

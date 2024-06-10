@@ -25,7 +25,7 @@ fun WeatherDataDto.toWeatherDataMap(): Map<Int, List<DayWeatherData>> {
             index = index,
             data = DayWeatherData(
                 time = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME),
-                temperatureCelsius = temperature.toInt(),
+                temperature = temperature.toInt(),
                 humidity = humidity.toInt(),
                 feelsTemperature = apparentTemperature.toInt(),
                 pressure = (pressure*0.75).toInt(),
