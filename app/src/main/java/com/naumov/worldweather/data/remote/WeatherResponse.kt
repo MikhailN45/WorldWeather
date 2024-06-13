@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class WeatherDto(
+data class WeatherResponse(
     @field:Json(name = "hourly")
     val weatherData: WeatherDataDto
 )

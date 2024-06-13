@@ -1,4 +1,4 @@
-package com.naumov.worldweather.domain.weather
+package com.naumov.worldweather.domain.model.weather
 
 data class WeeklyForecast(
     val date: String,

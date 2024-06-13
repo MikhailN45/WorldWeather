@@ -122,8 +122,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:textColor="@color/white"
                 android:layout_marginEnd="16dp"
+                android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="@+id/current_wind"
                 app:layout_constraintEnd_toStartOf="@+id/current_pressure"
                 app:layout_constraintStart_toEndOf="@+id/current_wind"
@@ -234,21 +234,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/weekly_forecast_title" />
-
-        <TextView
-            android:id="@+id/error_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textColor="@color/design_default_color_error"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

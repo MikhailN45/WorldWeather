@@ -1,6 +1,5 @@
 package com.naumov.worldweather.presentation.ui
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -8,10 +7,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.HourlyForecastItemBinding
-import com.naumov.worldweather.domain.weather.DayWeatherData
+import com.naumov.worldweather.domain.model.weather.DayWeatherData
 import java.time.format.DateTimeFormatter
 
-class HourlyForecastAdapter(private val context: Context) :
+class HourlyForecastAdapter :
     ListAdapter<DayWeatherData, HourlyForecastAdapter.ViewHolder>(HourlyDiffCallback()) {
 
     inner class ViewHolder(val binding: HourlyForecastItemBinding) :
@@ -25,12 +24,11 @@ class HourlyForecastAdapter(private val context: Context) :
         )
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.binding) {
         val weatherData = getItem(position)
-        holder.binding.date.text = weatherData.time.format(DateTimeFormatter.ofPattern("HH:mm"))
-        holder.binding.icWeatherTypeHourly.setImageResource(weatherData.weatherType.iconRes)
-        holder.binding.dayTemperature.text =
-            context.getString(R.string.degree, weatherData.temperature)
+        date.text = weatherData.time.format(DateTimeFormatter.ofPattern("HH:mm"))
+        icWeatherTypeHourly.setImageResource(weatherData.weatherType.iconRes)
+        dayTemperature.text = root.context.getString(R.string.degree, weatherData.temperature)
     }
 }
 

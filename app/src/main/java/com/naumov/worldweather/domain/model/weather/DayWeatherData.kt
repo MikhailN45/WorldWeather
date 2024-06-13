@@ -1,4 +1,4 @@
-package com.naumov.worldweather.domain.weather
+package com.naumov.worldweather.domain.model.weather
 
 import java.time.LocalDateTime
 

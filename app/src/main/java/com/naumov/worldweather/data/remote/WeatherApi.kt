@@ -8,7 +8,7 @@ interface WeatherApi {
     suspend fun getWeatherData(
         @Query("latitude") lat: Double,
         @Query("longitude") long: Double
-    ): WeatherDto
+    ): WeatherResponse
 
     companion object{
         private const val WEEKLY_OVERCAST_ROUTE =

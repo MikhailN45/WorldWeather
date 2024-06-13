@@ -5,12 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naumov.worldweather.domain.location.LocationTracker
+import com.naumov.worldweather.domain.model.util.Result
+import com.naumov.worldweather.domain.model.weather.DayWeatherData
+import com.naumov.worldweather.domain.model.weather.DetailedDayForecast
+import com.naumov.worldweather.domain.model.weather.WeatherInfo
+import com.naumov.worldweather.domain.model.weather.WeatherType
+import com.naumov.worldweather.domain.model.weather.WeeklyForecast
 import com.naumov.worldweather.domain.repository.WeatherRepository
-import com.naumov.worldweather.domain.util.Result
-import com.naumov.worldweather.domain.weather.DayWeatherData
-import com.naumov.worldweather.domain.weather.DetailedDayForecast
-import com.naumov.worldweather.domain.weather.WeatherType
-import com.naumov.worldweather.domain.weather.WeeklyForecast
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,93 +26,80 @@ class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository,
     private val locationTracker: LocationTracker
 ) : ViewModel() {
-    private val failToGetLocationMessage =
-        "Fail to get current location, make sure that GPS is active and permissions are granted!"
-    private val formatterDayMonth: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
     private val _state: MutableLiveData<WeatherState> = MutableLiveData(WeatherState())
     val state: LiveData<WeatherState> = _state
 
     fun processEvent(event: Event) {
         when (event) {
             is Event.RefreshData -> loadWeatherInfo()
-            is Event.WeeklyForecastDayPressed -> getDetailedDayForecast(event.day)
+            is Event.WeeklyForecastDayPressed -> getDetailedDayForecast(event.dayIndex)
         }
     }
 
+
     private fun loadWeatherInfo() {
         viewModelScope.launch {
-            _state.value = state.value?.copy(
-                isLoading = true
-            )
-
-            locationTracker.getCurrentLocation()?.let { location ->
-                val result =
-                    repository.getWeatherData(location.latitude, location.longitude)
-                when (result) {
-                    is Result.Success -> {
-                        _state.value = state.value?.copy(
-                            weatherInfo = result.data,
-                            location = location,
-                            isLoading = false,
-                            error = null
-                        )
-                       getTodayHourlyForecast()
-                       getWeeklyForecast()
-                    }
-
-                    is Result.Error -> {
-                        _state.value = state.value?.copy(
-                            isLoading = false,
-                            error = result.message
-                        )
-                    }
-                }
-            } ?: run {
+            _state.value = state.value?.copy(isLoading = true)
+            val location = locationTracker.getCurrentLocation() ?: run {
                 _state.value = state.value?.copy(
                     isLoading = false,
-                    error = failToGetLocationMessage
+                    error = FAIL_TO_GET_LOC_ERR
                 )
+                return@launch
+            }
+            when (val weatherInfoResult =
+                repository.getWeatherData(location.latitude, location.longitude)) {
+                is Result.Success -> {
+                    _state.value = state.value?.copy(
+                        weatherInfo = weatherInfoResult.data,
+                        location = location,
+                        weeklyForecast = weatherInfoResult.data?.let { getWeeklyForecast(it) }
+                            .orEmpty(),
+                        hourlyForecast = weatherInfoResult.data?.let { getTodayHourlyForecast(it) }
+                            .orEmpty(),
+                        isLoading = false,
+                        error = null
+                    )
+                }
+
+                is Result.Error -> {
+                    _state.value = state.value?.copy(
+                        isLoading = false,
+                        error = weatherInfoResult.message
+                    )
+                }
             }
         }
     }
 
-    private fun getWeeklyForecast() {
-        val weeklyForecast =
-            state.value?.weatherInfo?.weatherDataPerDay?.values?.map { dayWeather ->
-                val dayTemperature =
-                    countAverage(dayWeather.filter { it.time.hour in 11..17 }) { it.temperature }
-                val nightTemperature =
-                    countAverage(dayWeather.filter { it.time.hour in 0..6 }) { it.temperature }
-                val weatherType = calculateCommonWeatherType(dayWeather) { it.weatherType }
+    private fun getWeeklyForecast(weatherInfo: WeatherInfo): List<WeeklyForecast> =
+        weatherInfo.weatherDataPerDay.values.map { dayWeather ->
+            val dayTemperature =
+                countAverage(dayWeather.filter { it.time.hour in 11..17 }) { it.temperature }
+            val nightTemperature =
+                countAverage(dayWeather.filter { it.time.hour in 0..6 }) { it.temperature }
+            val weatherType = calculateCommonWeatherType(dayWeather) { it.weatherType }
 
-                WeeklyForecast(
-                    date = dayWeather.first().time.toLocalDate().format(formatterDayMonth),
-                    dayTemperature = dayTemperature,
-                    nightTemperature = nightTemperature,
-                    weatherType = weatherType
-                )
-            } ?: emptyList()
-
-        _state.value = _state.value?.copy(
-            weeklyForecast = weeklyForecast
-        )
-    }
+            WeeklyForecast(
+                date = dayWeather.first().time.toLocalDate().format(formatterDayMonth),
+                dayTemperature = dayTemperature,
+                nightTemperature = nightTemperature,
+                weatherType = weatherType
+            )
+        }
 
 
-    private fun getTodayHourlyForecast() {
+    private fun getTodayHourlyForecast(weatherInfo: WeatherInfo): List<DayWeatherData> {
         val nowHour = LocalDateTime.now().hour
-        val weatherDataPerDay = state.value?.weatherInfo?.weatherDataPerDay
-        val todayWeather = weatherDataPerDay?.get(0)?.drop(nowHour)
-        val tomorrowWeather = weatherDataPerDay?.get(1)?.take(nowHour)
-        _state.value = state.value?.copy(
-            hourlyForecast = (todayWeather ?: emptyList()) + (tomorrowWeather ?: emptyList())
-        )
+        val weatherDataPerDay = weatherInfo.weatherDataPerDay
+        val todayWeather = weatherDataPerDay[0]?.drop(nowHour)
+        val tomorrowWeather = weatherDataPerDay[1]?.take(nowHour)
+        return (todayWeather ?: emptyList()) + (tomorrowWeather ?: emptyList())
     }
 
-    private fun getDetailedDayForecast(day: Int) {
+    private fun getDetailedDayForecast(dayIndex: Int) {
         val selectedDayWeather =
-            state.value?.weatherInfo?.weatherDataPerDay?.get(day) ?: emptyList()
+            state.value?.weatherInfo?.weatherDataPerDay?.get(dayIndex) ?: emptyList()
 
         val (nightData,
             morningData,
@@ -192,5 +180,12 @@ class WeatherViewModel @Inject constructor(
     ): WeatherType {
         return data.groupingBy(selector).eachCount().maxByOrNull { it.value }?.key
             ?: WeatherType.ClearSky
+    }
+
+    companion object {
+        private val formatterDayMonth: DateTimeFormatter =
+            DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
+        private const val FAIL_TO_GET_LOC_ERR =
+            "Fail to get current location, make sure that GPS is active and permissions are granted!"
     }
 }

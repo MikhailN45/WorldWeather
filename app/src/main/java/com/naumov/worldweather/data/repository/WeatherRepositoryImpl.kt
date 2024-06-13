@@ -3,8 +3,8 @@ package com.naumov.worldweather.data.repository
 import com.naumov.worldweather.data.mappers.toWeatherInfo
 import com.naumov.worldweather.data.remote.WeatherApi
 import com.naumov.worldweather.domain.repository.WeatherRepository
-import com.naumov.worldweather.domain.util.Result
-import com.naumov.worldweather.domain.weather.WeatherInfo
+import com.naumov.worldweather.domain.model.util.Result
+import com.naumov.worldweather.domain.model.weather.WeatherInfo
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(

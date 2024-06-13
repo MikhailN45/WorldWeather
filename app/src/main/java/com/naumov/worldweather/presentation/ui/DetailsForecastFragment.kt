@@ -9,11 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.FragmentDetailsForecastBinding
-import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import kotlin.math.abs
-
 
 class DetailsForecastFragment : Fragment() {
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -31,8 +29,6 @@ class DetailsForecastFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setExitGesture(view)
-        val day = arguments?.getInt("day") ?: return
-        viewModel.processEvent(Event.WeeklyForecastDayPressed(day))
         viewModel.state.observe(viewLifecycleOwner) { state ->
             render(state)
         }

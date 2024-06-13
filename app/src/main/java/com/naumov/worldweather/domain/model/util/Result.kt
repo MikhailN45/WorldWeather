@@ -1,4 +1,4 @@
-package com.naumov.worldweather.domain.util
+package com.naumov.worldweather.domain.model.util
 
 sealed class Result<T>(val data: T? = null, val message: String? = null) {
     class Success<T>(data: T?) : Result<T>(data)

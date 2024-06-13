@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { viewModel.processEvent(Event.RefreshData) }
+
         permissionLauncher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,

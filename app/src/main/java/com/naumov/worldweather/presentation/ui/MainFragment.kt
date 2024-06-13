@@ -2,13 +2,13 @@ package com.naumov.worldweather.presentation.ui
 
 import android.location.Address
 import android.location.Geocoder
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -41,12 +41,10 @@ class MainFragment : Fragment() {
     }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        hourlyForecastAdapter = HourlyForecastAdapter(requireContext())
-        weeklyForecastAdapter = WeeklyForecastAdapter(requireContext()) { position ->
-                findNavController().navigate(
-                    R.id.action_mainFragment_to_detailsForecastFragment,
-                    bundleOf("day" to position)
-                )
+        hourlyForecastAdapter = HourlyForecastAdapter()
+        weeklyForecastAdapter = WeeklyForecastAdapter { position ->
+            viewModel.processEvent(Event.WeeklyForecastDayPressed(position))
+            findNavController().navigate(R.id.action_mainFragment_to_detailsForecastFragment)
         }
 
         with(binding) {
@@ -66,14 +64,15 @@ class MainFragment : Fragment() {
 
     private fun render(state: WeatherState) {
         initViews(state)
-        getLocationName(state)
         with(binding) {
             swipeRefreshLayout.isRefreshing = state.isLoading
-            errorMessage.isVisible = !state.error.isNullOrBlank()
-            errorMessage.text = state.error
-            currentLocation.text = getLocationName(state)
+            currentLocation.text = state.location?.let { getLocationName(it) }
             hourlyForecastAdapter.submitList(state.hourlyForecast)
             weeklyForecastAdapter.submitList(state.weeklyForecast)
+
+            if(!state.error.isNullOrBlank()){
+                Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -99,21 +98,21 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun getLocationName(state: WeatherState): String {
+    private fun getLocationName(location: Location): String {
         val geoCoder = Geocoder(requireContext(), Locale.getDefault())
-        var location = ""
-        state.location?.let {
+        var currentCity = ""
+        location.let {
             if (Build.VERSION.SDK_INT >= 33) {
                 geoCoder.getFromLocation(it.latitude, it.longitude, 1) { geoList ->
-                    location = geoList.first().locality ?: getString(R.string.current_location)
+                    currentCity = geoList.first().locality ?: getString(R.string.current_location)
                 }
             } else {
                 @Suppress("DEPRECATION") val geoList: List<Address>? =
                     geoCoder.getFromLocation(it.latitude, it.longitude, 1)
-                location = geoList?.first()?.locality ?: getString(R.string.current_location)
+                currentCity = geoList?.first()?.locality ?: getString(R.string.current_location)
             }
         }
-        return location
+        return currentCity
     }
 
     override fun onDestroy() {

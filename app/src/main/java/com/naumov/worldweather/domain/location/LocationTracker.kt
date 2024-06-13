@@ -2,6 +2,6 @@ package com.naumov.worldweather.domain.location
 
 import android.location.Location
 
-interface LocationTracker {
+fun interface LocationTracker {
     suspend fun getCurrentLocation(): Location?
 }
