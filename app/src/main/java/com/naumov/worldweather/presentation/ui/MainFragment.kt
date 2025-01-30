@@ -1,9 +1,5 @@
 package com.naumov.worldweather.presentation.ui
 
-import android.location.Address
-import android.location.Geocoder
-import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +17,6 @@ import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class MainFragment : Fragment() {
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -66,7 +61,7 @@ class MainFragment : Fragment() {
         initViews(state)
         with(binding) {
             swipeRefreshLayout.isRefreshing = state.isLoading
-            currentLocation.text = state.location?.let { getLocationName(it) }
+            currentLocation.text = state.locationName
             hourlyForecastAdapter.submitList(state.hourlyForecast)
             weeklyForecastAdapter.submitList(state.weeklyForecast)
 
@@ -75,6 +70,7 @@ class MainFragment : Fragment() {
             }
         }
     }
+
 
     private fun initViews(state: WeatherState) {
         with(binding) {
@@ -96,23 +92,6 @@ class MainFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun getLocationName(location: Location): String {
-        val geoCoder = Geocoder(requireContext(), Locale.getDefault())
-        var currentCity = ""
-        location.let {
-            if (Build.VERSION.SDK_INT >= 33) {
-                geoCoder.getFromLocation(it.latitude, it.longitude, 1) { geoList ->
-                    currentCity = geoList.first().locality ?: getString(R.string.current_location)
-                }
-            } else {
-                @Suppress("DEPRECATION") val geoList: List<Address>? =
-                    geoCoder.getFromLocation(it.latitude, it.longitude, 1)
-                currentCity = geoList?.first()?.locality ?: getString(R.string.current_location)
-            }
-        }
-        return currentCity
     }
 
     override fun onDestroy() {

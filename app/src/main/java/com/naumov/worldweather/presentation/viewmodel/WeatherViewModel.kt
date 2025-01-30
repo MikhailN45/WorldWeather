@@ -12,6 +12,7 @@ import com.naumov.worldweather.domain.model.weather.WeatherInfo
 import com.naumov.worldweather.domain.model.weather.WeatherType
 import com.naumov.worldweather.domain.model.weather.WeeklyForecast
 import com.naumov.worldweather.domain.repository.WeatherRepository
+import com.naumov.worldweather.domain.usecase.LocationNameProviderUseCase
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository,
-    private val locationTracker: LocationTracker
+    private val locationTracker: LocationTracker,
+    private val locationNameProviderUseCase: LocationNameProviderUseCase
 ) : ViewModel() {
     private val _state: MutableLiveData<WeatherState> = MutableLiveData(WeatherState())
     val state: LiveData<WeatherState> = _state
@@ -47,6 +49,11 @@ class WeatherViewModel @Inject constructor(
                 )
                 return@launch
             }
+
+            locationNameProviderUseCase.execute(location) { locationName ->
+                _state.postValue(_state.value?.copy(locationName = locationName))
+            }
+
             when (val weatherInfoResult =
                 repository.getWeatherData(location.latitude, location.longitude)) {
                 is Result.Success -> {

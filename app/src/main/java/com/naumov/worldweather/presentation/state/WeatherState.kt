@@ -12,6 +12,7 @@ data class WeatherState(
     val hourlyForecast: List<DayWeatherData> = emptyList(),
     val detailedDayForecast: DetailedDayForecast? = null,
     val location: Location? = null,
+    val locationName: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )
