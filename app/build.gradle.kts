@@ -66,13 +66,14 @@ dependencies {
 
     //NET
     implementation(libs.retrofit)
-    implementation(libs.converter.moshi)
+    implementation(libs.gson)
+    implementation(libs.gson.factory)
     implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
-    ksp(libs.moshi.kotlin.codegen)
 
     //DB
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
     //DI
