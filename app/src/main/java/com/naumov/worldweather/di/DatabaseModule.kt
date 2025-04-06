@@ -11,7 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 
-/*@Module
+@Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
     @Provides
@@ -28,6 +28,4 @@ object DatabaseModule {
     fun provideWeatherDao(database: AppDatabase): WeatherDao {
         return database.weatherDao()
     }
-}*/
-
-
+}

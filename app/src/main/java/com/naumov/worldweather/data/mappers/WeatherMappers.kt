@@ -1,11 +1,14 @@
 package com.naumov.worldweather.data.mappers
 
+import com.naumov.worldweather.data.database.dao.HourlyWeatherDataEntity
+import com.naumov.worldweather.data.database.dao.WeatherEntity
 import com.naumov.worldweather.data.remote.WeatherDataDto
 import com.naumov.worldweather.data.remote.WeatherResponse
 import com.naumov.worldweather.domain.model.weather.DayWeatherData
 import com.naumov.worldweather.domain.model.weather.WeatherInfo
 import com.naumov.worldweather.domain.model.weather.WeatherType
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 private data class IndexedWeatherData(
@@ -52,5 +55,61 @@ fun WeatherResponse.toWeatherInfo(): WeatherInfo {
     return WeatherInfo(
         weatherDataPerDay = weatherDataMap,
         currentDayWeatherData = currentWeatherData
+    )
+}
+
+fun WeatherInfo.toWeatherEntity(): Pair<WeatherEntity, List<HourlyWeatherDataEntity>> {
+    val weatherEntity = WeatherEntity(
+        startTimeEpoch = currentDayWeatherData?.time?.toEpochSecond(ZoneOffset.UTC) ?: 0
+    )
+
+    val hourlyWeatherDataEntities = weatherDataPerDay.flatMap { (_, dayWeatherDataList) ->
+        dayWeatherDataList.map { weatherData ->
+            HourlyWeatherDataEntity(
+                weatherInfoId = 0,
+                hour = weatherData.time.hour,
+                temperature = weatherData.temperature,
+                humidity = weatherData.humidity,
+                feelsTemperature = weatherData.feelsTemperature,
+                pressure = weatherData.pressure,
+                windSpeed = weatherData.windSpeed,
+                weatherWmoCode = WeatherType.toWMO(weatherData.weatherType)
+            )
+        }
+    }
+
+    return Pair(weatherEntity, hourlyWeatherDataEntities)
+}
+
+fun WeatherEntity.toWeatherInfo(hourlyData: List<HourlyWeatherDataEntity>): WeatherInfo {
+    val weatherDataPerDay = hourlyData.groupBy { it.hour / 24 }
+
+    return WeatherInfo(
+        weatherDataPerDay = weatherDataPerDay.mapValues { (_, data) ->
+            data.map {
+                DayWeatherData(
+                    time = LocalDateTime.ofEpochSecond(it.hour.toLong(), 0, ZoneOffset.UTC),
+                    temperature = it.temperature,
+                    humidity = it.humidity,
+                    feelsTemperature = it.feelsTemperature,
+                    pressure = it.pressure,
+                    windSpeed = it.windSpeed,
+                    weatherType = WeatherType.fromWMO(it.weatherWmoCode)
+                )
+            }
+        },
+        currentDayWeatherData = weatherDataPerDay[0]?.firstOrNull()?.toDayWeatherData()
+    )
+}
+
+fun HourlyWeatherDataEntity.toDayWeatherData(): DayWeatherData {
+    return DayWeatherData(
+        time = LocalDateTime.ofEpochSecond(hour.toLong() * 3600, 0, ZoneOffset.UTC),
+        temperature = temperature,
+        humidity = humidity,
+        feelsTemperature = feelsTemperature,
+        pressure = pressure,
+        windSpeed = windSpeed,
+        weatherType = WeatherType.fromWMO(weatherWmoCode)
     )
 }

@@ -11,5 +11,8 @@ interface WeatherDao {
     suspend fun getLastWeather(): WeatherEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWeather(weather: WeatherEntity)
+    suspend fun insertWeather(weather: WeatherEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHourlyWeatherData(hourlyWeatherData: List<HourlyWeatherDataEntity>)
 }
