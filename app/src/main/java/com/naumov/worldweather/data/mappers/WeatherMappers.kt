@@ -77,7 +77,6 @@ fun WeatherInfo.toWeatherEntity(): Pair<WeatherEntity, List<HourlyWeatherDataEnt
             )
         }
     }
-
     return Pair(weatherEntity, hourlyWeatherDataEntities)
 }
 

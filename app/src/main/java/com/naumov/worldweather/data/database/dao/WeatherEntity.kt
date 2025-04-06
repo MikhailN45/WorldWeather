@@ -4,8 +4,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.naumov.worldweather.domain.model.weather.DayWeatherData
-import java.time.LocalDateTime
 
 @Entity(tableName = "weather_info")
 data class WeatherEntity(
