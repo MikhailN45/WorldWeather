@@ -13,6 +13,7 @@ data class WeatherState(
     val detailedDayForecast: DetailedDayForecast? = null,
     val location: Location? = null,
     val locationName: String = "",
+    val lastUpdateTime: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )

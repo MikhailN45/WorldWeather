@@ -11,13 +11,16 @@ import com.naumov.worldweather.domain.model.weather.DetailedDayForecast
 import com.naumov.worldweather.domain.model.weather.WeatherInfo
 import com.naumov.worldweather.domain.model.weather.WeatherType
 import com.naumov.worldweather.domain.model.weather.WeeklyForecast
+import com.naumov.worldweather.domain.preferences.PreferencesManager
 import com.naumov.worldweather.domain.repository.WeatherRepository
 import com.naumov.worldweather.domain.usecase.LocationNameProviderUseCase
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
@@ -26,7 +29,8 @@ import javax.inject.Inject
 class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository,
     private val locationTracker: LocationTracker,
-    private val locationNameProviderUseCase: LocationNameProviderUseCase
+    private val locationNameProviderUseCase: LocationNameProviderUseCase,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
     private val _state: MutableLiveData<WeatherState> = MutableLiveData(WeatherState())
     val state: LiveData<WeatherState> = _state
@@ -38,10 +42,10 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-
     private fun loadWeatherInfo() {
         viewModelScope.launch {
             _state.value = state.value?.copy(isLoading = true)
+
             val location = locationTracker.getCurrentLocation() ?: run {
                 _state.value = state.value?.copy(
                     isLoading = false,
@@ -50,29 +54,38 @@ class WeatherViewModel @Inject constructor(
                 return@launch
             }
 
-            locationNameProviderUseCase.execute(location) { locationName ->
-                _state.postValue(_state.value?.copy(locationName = locationName))
+            launch {
+                locationNameProviderUseCase.execute(location) { locationName ->
+                    _state.postValue(_state.value?.copy(locationName = locationName))
+                }
             }
 
-            when (val weatherInfoResult =
-                repository.getWeatherData(location.latitude, location.longitude)) {
-                is Result.Success -> {
+            launch {
+                repository.fetchWeatherFlow().collect { weatherInfo ->
+                    val lastUpdateMillis = preferencesManager.getLastUpdateTime()
+                    val lastUpdateTime = lastUpdateMillis?.let {
+                        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    }
+
                     _state.value = state.value?.copy(
-                        weatherInfo = weatherInfoResult.data,
+                        weatherInfo = weatherInfo,
                         location = location,
-                        weeklyForecast = weatherInfoResult.data?.let { getWeeklyForecast(it) }
-                            .orEmpty(),
-                        hourlyForecast = weatherInfoResult.data?.let { getTodayHourlyForecast(it) }
-                            .orEmpty(),
+                        lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "",
+                        weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
+                        hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }.orEmpty(),
                         isLoading = false,
                         error = null
                     )
                 }
+            }
 
-                is Result.Error -> {
+
+            launch {
+                val result = repository.getWeatherDataFromApi(location.latitude, location.longitude)
+                if (result is Result.Error) {
                     _state.value = state.value?.copy(
                         isLoading = false,
-                        error = weatherInfoResult.message
+                        error = result.message
                     )
                 }
             }

@@ -15,8 +15,6 @@ import com.naumov.worldweather.databinding.FragmentMainBinding
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class MainFragment : Fragment() {
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -24,8 +22,6 @@ class MainFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var hourlyForecastAdapter: HourlyForecastAdapter
     private lateinit var weeklyForecastAdapter: WeeklyForecastAdapter
-    private val formatterHourMinute: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("HH:mm")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,7 +61,7 @@ class MainFragment : Fragment() {
             hourlyForecastAdapter.submitList(state.hourlyForecast)
             weeklyForecastAdapter.submitList(state.weeklyForecast)
 
-            if(!state.error.isNullOrBlank()){
+            if (!state.error.isNullOrBlank()) {
                 Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
             }
         }
@@ -84,8 +80,7 @@ class MainFragment : Fragment() {
                     currentApparentTemperature.text =
                         getString(R.string.feels_temp, feelsTemperature)
                     updateTime.text = getString(
-                        R.string.update_time, LocalDateTime.now()
-                            .format(formatterHourMinute)
+                        R.string.update_time, state.lastUpdateTime
                     )
                     weatherTypeText.text = weatherType.weatherDesc
                     icWeatherType.setImageResource(weatherType.iconRes)

@@ -25,6 +25,7 @@ data class HourlyWeatherDataEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val weatherInfoId: Int,
     val hour: Int,
+    val rawTime: String,
     val temperature: Int,
     val humidity: Int,
     val feelsTemperature: Int,

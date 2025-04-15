@@ -4,11 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeatherDao {
     @Query("SELECT * FROM weather_info LIMIT 1")
-    suspend fun getLastWeather(): WeatherEntity?
+    fun getLastWeatherFlow(): Flow<WeatherEntity?>
+
+    @Query("SELECT * FROM hourly_weather_data WHERE weatherInfoId = :weatherInfoId")
+    suspend fun getHourlyWeatherDataByWeatherId(weatherInfoId: Int): List<HourlyWeatherDataEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWeather(weather: WeatherEntity): Long

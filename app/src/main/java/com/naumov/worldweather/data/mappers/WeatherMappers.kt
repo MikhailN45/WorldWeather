@@ -68,6 +68,7 @@ fun WeatherInfo.toWeatherEntity(): Pair<WeatherEntity, List<HourlyWeatherDataEnt
             HourlyWeatherDataEntity(
                 weatherInfoId = 0,
                 hour = weatherData.time.hour,
+                rawTime = weatherData.time.toString(),
                 temperature = weatherData.temperature,
                 humidity = weatherData.humidity,
                 feelsTemperature = weatherData.feelsTemperature,
@@ -81,13 +82,19 @@ fun WeatherInfo.toWeatherEntity(): Pair<WeatherEntity, List<HourlyWeatherDataEnt
 }
 
 fun WeatherEntity.toWeatherInfo(hourlyData: List<HourlyWeatherDataEntity>): WeatherInfo {
-    val weatherDataPerDay = hourlyData.groupBy { it.hour / 24 }
+    // Группируем данные по номерам дней
+    val weatherDataPerDay = hourlyData.groupBy {
+        // Вычисляем номер дня от startTimeEpoch
+        val rawTime = LocalDateTime.parse(it.rawTime, DateTimeFormatter.ISO_DATE_TIME)
+        val epochDay = rawTime.toLocalDate().toEpochDay() // Получаем номер дня
+        epochDay.minus(LocalDateTime.ofEpochSecond(startTimeEpoch, 0, ZoneOffset.UTC).toLocalDate().toEpochDay()).toInt()
+    }
 
     return WeatherInfo(
         weatherDataPerDay = weatherDataPerDay.mapValues { (_, data) ->
             data.map {
                 DayWeatherData(
-                    time = LocalDateTime.ofEpochSecond(it.hour.toLong(), 0, ZoneOffset.UTC),
+                    time = LocalDateTime.parse(it.rawTime, DateTimeFormatter.ISO_DATE_TIME),
                     temperature = it.temperature,
                     humidity = it.humidity,
                     feelsTemperature = it.feelsTemperature,
@@ -103,7 +110,7 @@ fun WeatherEntity.toWeatherInfo(hourlyData: List<HourlyWeatherDataEntity>): Weat
 
 fun HourlyWeatherDataEntity.toDayWeatherData(): DayWeatherData {
     return DayWeatherData(
-        time = LocalDateTime.ofEpochSecond(hour.toLong() * 3600, 0, ZoneOffset.UTC),
+        time = LocalDateTime.parse(rawTime, DateTimeFormatter.ISO_DATE_TIME),
         temperature = temperature,
         humidity = humidity,
         feelsTemperature = feelsTemperature,
