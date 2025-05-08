@@ -82,11 +82,9 @@ fun WeatherInfo.toWeatherEntity(): Pair<WeatherEntity, List<HourlyWeatherDataEnt
 }
 
 fun WeatherEntity.toWeatherInfo(hourlyData: List<HourlyWeatherDataEntity>): WeatherInfo {
-    // Группируем данные по номерам дней
     val weatherDataPerDay = hourlyData.groupBy {
-        // Вычисляем номер дня от startTimeEpoch
         val rawTime = LocalDateTime.parse(it.rawTime, DateTimeFormatter.ISO_DATE_TIME)
-        val epochDay = rawTime.toLocalDate().toEpochDay() // Получаем номер дня
+        val epochDay = rawTime.toLocalDate().toEpochDay()
         epochDay.minus(LocalDateTime.ofEpochSecond(startTimeEpoch, 0, ZoneOffset.UTC).toLocalDate().toEpochDay()).toInt()
     }
 

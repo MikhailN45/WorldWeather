@@ -1,6 +1,7 @@
 package com.naumov.worldweather.data.repository
 
 import com.naumov.worldweather.data.database.dao.WeatherDao
+import com.naumov.worldweather.data.database.dao.WeatherEntity
 import com.naumov.worldweather.data.mappers.toWeatherEntity
 import com.naumov.worldweather.data.mappers.toWeatherInfo
 import com.naumov.worldweather.data.remote.WeatherApi
@@ -14,41 +15,52 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(
-    private val api: WeatherApi,
-    private val weatherDao: WeatherDao,
+    private val api: WeatherApi, //remoteDS
+    private val weatherDao: WeatherDao, //datasource catch errors  LocalDataSource / RoomLocalDataSource
     private val preferencesManager: PreferencesManager
 ) : WeatherRepository {
     override suspend fun getWeatherDataFromApi(lat: Double, lon: Double): Result<WeatherInfo> {
         return try {
             val weatherInfo = api.getWeatherData(lat, lon).toWeatherInfo() //Net -> Domain
-            saveWeatherDataToDb(weatherInfo)
+            updateDatabase(weatherInfo)
             preferencesManager.saveLastUpdateTime(System.currentTimeMillis())
             Result.Success(data = weatherInfo)
         } catch (e: UnknownHostException) {
             e.printStackTrace()
-            Result.Error("Нет подключения к интернету. Проверьте сеть и повторите попытку.")
+            Result.Error(NO_CONNECTION_ERR)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Error(e.message ?: "Unknown NET REQUEST error!")
+            Result.Error(e.message ?: UNKNOWN_ERR)
         }
     }
 
-    private suspend fun saveWeatherDataToDb(weatherInfo: WeatherInfo) {
-        val (weatherEntity, hourlyWeatherDataEntities) = weatherInfo.toWeatherEntity() //Domain -> Data
-        val weatherEntityId = weatherDao.insertWeather(weatherEntity) //generate ID
+    private suspend fun updateDatabase(weatherInfo: WeatherInfo) {
+        weatherDao.deleteOldWeatherData()
+
+        val (weatherEntity, hourlyWeatherDataEntities) = weatherInfo.toWeatherEntity() //Domain -> Data || Convert in Repo
+        val weatherEntityId = weatherDao.insertWeather(weatherEntity) //generate ID DS -
         val hourlyWeatherDataEntitiesWithId = hourlyWeatherDataEntities.map {
             it.copy(weatherInfoId = weatherEntityId.toInt())
         } //link weather by hours to ID
+
         weatherDao.insertHourlyWeatherData(hourlyWeatherDataEntitiesWithId) //save linked data
     }
 
     override fun fetchWeatherFlow(): Flow<WeatherInfo?> {
         return weatherDao.getLastWeatherFlow()
             .map { weatherEntity ->
-                weatherEntity?.let { entity ->
-                    val hourlyWeatherData = weatherDao.getHourlyWeatherDataByWeatherId(entity.id)
-                    entity.toWeatherInfo(hourlyWeatherData)
-                }
+                weatherEntity?.let { transformWeatherEntity(it) }
             }
+    }
+
+    private suspend fun transformWeatherEntity(entity: WeatherEntity): WeatherInfo {
+        val hourlyWeatherData = weatherDao.getHourlyWeatherDataByWeatherId(entity.id)
+        return entity.toWeatherInfo(hourlyWeatherData)
+    }
+
+    companion object {
+        private const val NO_CONNECTION_ERR =
+            "No internet connection. Restore it and try again."
+        private const val UNKNOWN_ERR = "Unknown NET REQUEST error!"
     }
 }

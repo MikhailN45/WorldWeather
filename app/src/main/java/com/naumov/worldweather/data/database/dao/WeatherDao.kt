@@ -8,7 +8,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeatherDao {
-    @Query("SELECT * FROM weather_info LIMIT 1")
+    //@Query("SELECT * FROM weather_info LIMIT 1")
+    //fun getLastWeatherFlow(): Flow<WeatherEntity?>
+
+    @Query("SELECT * FROM weather_info ORDER BY startTimeEpoch DESC LIMIT 1")
     fun getLastWeatherFlow(): Flow<WeatherEntity?>
 
     @Query("SELECT * FROM hourly_weather_data WHERE weatherInfoId = :weatherInfoId")
@@ -19,4 +22,7 @@ interface WeatherDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHourlyWeatherData(hourlyWeatherData: List<HourlyWeatherDataEntity>)
+
+    @Query("DELETE FROM weather_info WHERE startTimeEpoch < (SELECT MAX(startTimeEpoch) FROM weather_info)")
+    suspend fun deleteOldWeatherData()
 }

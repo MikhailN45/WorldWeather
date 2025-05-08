@@ -17,6 +17,8 @@ import com.naumov.worldweather.domain.usecase.LocationNameProviderUseCase
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
@@ -33,7 +35,11 @@ class WeatherViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
     private val _state: MutableLiveData<WeatherState> = MutableLiveData(WeatherState())
-    val state: LiveData<WeatherState> = _state
+    val state: LiveData<WeatherState> = _state //flow
+
+    init {
+        //processEvent(Event.RefreshData)
+    }
 
     fun processEvent(event: Event) {
         when (event) {
@@ -55,29 +61,27 @@ class WeatherViewModel @Inject constructor(
             }
 
             launch {
-                locationNameProviderUseCase.execute(location) { locationName ->
-                    _state.postValue(_state.value?.copy(locationName = locationName))
-                }
+                val locationName = locationNameProviderUseCase(location)
+                _state.postValue(_state.value?.copy(locationName = locationName))
             }
 
-            launch {
-                repository.fetchWeatherFlow().collect { weatherInfo ->
-                    val lastUpdateMillis = preferencesManager.getLastUpdateTime()
-                    val lastUpdateTime = lastUpdateMillis?.let {
-                        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
-                    }
-
-                    _state.value = state.value?.copy(
-                        weatherInfo = weatherInfo,
-                        location = location,
-                        lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "",
-                        weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
-                        hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }.orEmpty(),
-                        isLoading = false,
-                        error = null
-                    )
+            repository.fetchWeatherFlow().onEach { weatherInfo ->
+                val lastUpdateMillis = preferencesManager.getLastUpdateTime()
+                val lastUpdateTime = lastUpdateMillis?.let {
+                    Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
                 }
-            }
+
+                _state.value = state.value?.copy(
+                    weatherInfo = weatherInfo,
+                    location = location,
+                    lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
+                        ?: "",
+                    weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
+                    hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }.orEmpty(),
+                    isLoading = false,
+                    error = null
+                )
+            }.launchIn(viewModelScope)
 
 
             launch {
@@ -206,6 +210,6 @@ class WeatherViewModel @Inject constructor(
         private val formatterDayMonth: DateTimeFormatter =
             DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
         private const val FAIL_TO_GET_LOC_ERR =
-            "Fail to get current location, make sure that GPS is active and permissions are granted!"
+            "Fail to get current location, make sure that GPS is active and permissions are granted."
     }
 }

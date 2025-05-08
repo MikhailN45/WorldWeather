@@ -10,7 +10,7 @@ import androidx.core.content.edit
 @Singleton
 class PreferencesManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context
-) : PreferencesManager {
+) : PreferencesManager { //LDS
     private val sharedPreferences = context.getSharedPreferences("weather_prefs", Context.MODE_PRIVATE)
     private val lastUpdateKey = "last_update_time"
 
