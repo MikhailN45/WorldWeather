@@ -7,11 +7,12 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.naumov.worldweather"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.naumov.worldweather"
@@ -44,6 +45,8 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+        compose = true
     }
 }
 
@@ -63,6 +66,11 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.bumptechGlide)
     implementation (libs.androidx.swiperefreshlayout)
+
+    //Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+    debugImplementation(libs.bundles.compose.debug)
 
     //NET
     implementation(libs.retrofit)
