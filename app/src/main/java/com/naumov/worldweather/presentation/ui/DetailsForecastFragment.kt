@@ -7,10 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.naumov.worldweather.R
 import com.naumov.worldweather.databinding.FragmentDetailsForecastBinding
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class DetailsForecastFragment : Fragment() {
@@ -29,8 +33,12 @@ class DetailsForecastFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setExitGesture(view)
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            render(state)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    render(state)
+                }
+            }
         }
     }
 

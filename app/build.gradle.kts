@@ -86,6 +86,7 @@ dependencies {
 
     //DI
     implementation(libs.hilt.android)
+    implementation(libs.hilt.android.navigation)
     ksp(libs.hilt.android.compiler)
 
     //Firebase

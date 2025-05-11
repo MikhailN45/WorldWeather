@@ -1,7 +1,5 @@
 package com.naumov.worldweather.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naumov.worldweather.domain.location.LocationTracker
@@ -17,8 +15,10 @@ import com.naumov.worldweather.domain.usecase.LocationNameProviderUseCase
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
@@ -34,12 +34,8 @@ class WeatherViewModel @Inject constructor(
     private val locationNameProviderUseCase: LocationNameProviderUseCase,
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
-    private val _state: MutableLiveData<WeatherState> = MutableLiveData(WeatherState())
-    val state: LiveData<WeatherState> = _state //flow
-
-    init {
-        //processEvent(Event.RefreshData)
-    }
+    private val _state = MutableStateFlow(WeatherState())
+    val state: StateFlow<WeatherState> = _state.asStateFlow()
 
     fun processEvent(event: Event) {
         when (event) {
@@ -50,47 +46,56 @@ class WeatherViewModel @Inject constructor(
 
     private fun loadWeatherInfo() {
         viewModelScope.launch {
-            _state.value = state.value?.copy(isLoading = true)
+            _state.update { it.copy(isLoading = true) }
 
             val location = locationTracker.getCurrentLocation() ?: run {
-                _state.value = state.value?.copy(
-                    isLoading = false,
-                    error = FAIL_TO_GET_LOC_ERR
-                )
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = FAIL_TO_GET_LOC_ERR
+                    )
+                }
                 return@launch
             }
 
             launch {
                 val locationName = locationNameProviderUseCase(location)
-                _state.postValue(_state.value?.copy(locationName = locationName))
+                _state.update { it.copy(locationName = locationName) }
             }
 
-            repository.fetchWeatherFlow().onEach { weatherInfo ->
-                val lastUpdateMillis = preferencesManager.getLastUpdateTime()
-                val lastUpdateTime = lastUpdateMillis?.let {
-                    Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
-                }
+            launch {
+                repository.fetchWeatherFlow().collect { weatherInfo ->
+                    val lastUpdateMillis = preferencesManager.getLastUpdateTime()
+                    val lastUpdateTime = lastUpdateMillis?.let {
+                        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    }
 
-                _state.value = state.value?.copy(
-                    weatherInfo = weatherInfo,
-                    location = location,
-                    lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
-                        ?: "",
-                    weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
-                    hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }.orEmpty(),
-                    isLoading = false,
-                    error = null
-                )
-            }.launchIn(viewModelScope)
+                    _state.update {
+                        it.copy(
+                            weatherInfo = weatherInfo,
+                            location = location,
+                            lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
+                                ?: "",
+                            weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
+                            hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }
+                                .orEmpty(),
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                }
+            }
 
 
             launch {
                 val result = repository.getWeatherDataFromApi(location.latitude, location.longitude)
                 if (result is Result.Error) {
-                    _state.value = state.value?.copy(
-                        isLoading = false,
-                        error = result.message
-                    )
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
                 }
             }
         }
@@ -123,7 +128,7 @@ class WeatherViewModel @Inject constructor(
 
     private fun getDetailedDayForecast(dayIndex: Int) {
         val selectedDayWeather =
-            state.value?.weatherInfo?.weatherDataPerDay?.get(dayIndex) ?: emptyList()
+            _state.value.weatherInfo?.weatherDataPerDay?.get(dayIndex) ?: emptyList()
 
         val (nightData,
             morningData,
@@ -186,9 +191,11 @@ class WeatherViewModel @Inject constructor(
             pressureEvening = pressures[3]
         )
 
-        _state.value = state.value?.copy(
-            detailedDayForecast = detailedDayForecast
-        )
+        _state.update {
+            it.copy(
+                detailedDayForecast = detailedDayForecast
+            )
+        }
     }
 
     private fun countAverage(

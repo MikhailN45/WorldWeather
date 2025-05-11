@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +18,7 @@ import com.naumov.worldweather.databinding.FragmentMainBinding
 import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.state.WeatherState
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
+import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -47,8 +51,12 @@ class MainFragment : Fragment() {
             weeklyForecastRecycler.adapter = weeklyForecastAdapter
         }
 
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            render(state)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    render(state)
+                }
+            }
         }
     }
 
