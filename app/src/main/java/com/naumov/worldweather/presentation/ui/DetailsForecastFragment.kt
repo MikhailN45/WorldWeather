@@ -49,28 +49,38 @@ class DetailsForecastFragment : Fragment() {
             icWeatherTypeEvening.setImageResource(forecast.weatherTypeEvening.iconRes)
             icWeatherTypeNight.setImageResource(forecast.weatherTypeNight.iconRes)
             //Temp
-            morningTemperatureValue.text = getString(R.string.degree, forecast.temperatureMorning)
-            dayTemperatureValue.text = getString(R.string.degree, forecast.temperatureDay)
-            eveningTemperatureValue.text = getString(R.string.degree, forecast.temperatureEvening)
-            nightTemperatureValue.text = getString(R.string.degree, forecast.temperatureNight)
+            morningTemperatureValue.text =
+                getString(R.string.degree, forecast.temperatureMorning.toString())
+            dayTemperatureValue.text =
+                getString(R.string.degree, forecast.temperatureDay.toString())
+            eveningTemperatureValue.text =
+                getString(R.string.degree, forecast.temperatureEvening.toString())
+            nightTemperatureValue.text =
+                getString(R.string.degree, forecast.temperatureNight.toString())
             //Apparent Temp
             morningApparentTemperature.text =
-                getString(R.string.degree, forecast.feelTemperatureMorning)
-            dayApparentTemperature.text = getString(R.string.degree, forecast.feelTemperatureDay)
+                getString(R.string.degree, forecast.feelTemperatureMorning.toString())
+            dayApparentTemperature.text =
+                getString(R.string.degree, forecast.feelTemperatureDay.toString())
             eveningApparentTemperature.text =
-                getString(R.string.degree, forecast.feelTemperatureEvening)
+                getString(R.string.degree, forecast.feelTemperatureEvening.toString())
             nightApparentTemperature.text =
-                getString(R.string.degree, forecast.feelTemperatureNight)
+                getString(R.string.degree, forecast.feelTemperatureNight.toString())
             //Wind
-            morningWindValue.text = getString(R.string.meter_in_seconds, forecast.windMorning)
-            dayWindValue.text = getString(R.string.meter_in_seconds, forecast.windDay)
-            eveningWindValue.text = getString(R.string.meter_in_seconds, forecast.windEvening)
-            nightWindValue.text = getString(R.string.meter_in_seconds, forecast.windNight)
+            morningWindValue.text =
+                getString(R.string.meter_in_seconds, forecast.windMorning.toString())
+            dayWindValue.text = getString(R.string.meter_in_seconds, forecast.windDay.toString())
+            eveningWindValue.text =
+                getString(R.string.meter_in_seconds, forecast.windEvening.toString())
+            nightWindValue.text =
+                getString(R.string.meter_in_seconds, forecast.windNight.toString())
             //Humidity
-            morningHumidityValue.text = getString(R.string.percent, forecast.humidityMorning)
-            dayHumidityValue.text = getString(R.string.percent, forecast.humidityDay)
-            eveningHumidityValue.text = getString(R.string.percent, forecast.humidityEvening)
-            nightHumidityValue.text = getString(R.string.percent, forecast.humidityNight)
+            morningHumidityValue.text =
+                getString(R.string.percent, forecast.humidityMorning.toString())
+            dayHumidityValue.text = getString(R.string.percent, forecast.humidityDay.toString())
+            eveningHumidityValue.text =
+                getString(R.string.percent, forecast.humidityEvening.toString())
+            nightHumidityValue.text = getString(R.string.percent, forecast.humidityNight.toString())
             //Pressure
             morningPressureValue.text = forecast.pressureMorning.toString()
             dayPressureValue.text = forecast.pressureDay.toString()

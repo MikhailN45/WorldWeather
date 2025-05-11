@@ -28,7 +28,7 @@ class HourlyForecastAdapter :
         val weatherData = getItem(position)
         date.text = weatherData.time.format(DateTimeFormatter.ofPattern("HH:mm"))
         icWeatherTypeHourly.setImageResource(weatherData.weatherType.iconRes)
-        dayTemperature.text = root.context.getString(R.string.degree, weatherData.temperature)
+        dayTemperature.text = root.context.getString(R.string.degree, weatherData.temperature.toString())
     }
 }
 

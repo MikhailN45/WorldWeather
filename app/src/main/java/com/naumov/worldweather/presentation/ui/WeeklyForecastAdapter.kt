@@ -30,9 +30,9 @@ class WeeklyForecastAdapter(val onItemClick: (Int) -> Unit) :
             date.text = weatherData.date
             icWeatherTypeHourly.setImageResource(weatherData.weatherType.iconRes)
             dayTemperature.text =
-                root.context.getString(R.string.degree, weatherData.dayTemperature)
+                root.context.getString(R.string.degree, weatherData.dayTemperature.toString())
             nightTemperature.text =
-                root.context.getString(R.string.degree, weatherData.nightTemperature)
+                root.context.getString(R.string.degree, weatherData.nightTemperature.toString())
         }
 
     }

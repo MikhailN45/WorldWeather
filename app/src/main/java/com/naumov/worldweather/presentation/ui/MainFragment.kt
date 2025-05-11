@@ -42,7 +42,6 @@ class MainFragment : Fragment() {
             hourlyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
             hourlyForecastRecycler.adapter = hourlyForecastAdapter
-
             weeklyForecastRecycler.layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
             weeklyForecastRecycler.adapter = weeklyForecastAdapter
@@ -73,12 +72,14 @@ class MainFragment : Fragment() {
             swipeRefreshLayout.setOnRefreshListener { viewModel.processEvent(Event.RefreshData) }
             state.weatherInfo?.currentDayWeatherData?.let {
                 with(state.weatherInfo.currentDayWeatherData) {
-                    currentTemperature.text = getString(R.string.degree, temperature)
-                    currentWindText.text = getString(R.string.meter_in_seconds, windSpeed)
-                    currentPressureText.text = getString(R.string.millimeters_pressure, pressure)
-                    currentHumidityText.text = getString(R.string.percent, humidity)
+                    currentTemperature.text = getString(R.string.degree, temperature.toString())
+                    currentWindText.text =
+                        getString(R.string.meter_in_seconds, windSpeed.toString())
+                    currentPressureText.text =
+                        getString(R.string.millimeters_pressure, pressure.toString())
+                    currentHumidityText.text = getString(R.string.percent, humidity.toString())
                     currentApparentTemperature.text =
-                        getString(R.string.feels_temp, feelsTemperature)
+                        getString(R.string.feels_temp, feelsTemperature.toString())
                     updateTime.text = getString(
                         R.string.update_time, state.lastUpdateTime
                     )

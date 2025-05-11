@@ -13,6 +13,7 @@ import com.naumov.worldweather.presentation.event.Event
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
