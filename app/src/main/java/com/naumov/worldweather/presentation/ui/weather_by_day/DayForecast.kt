@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -18,26 +19,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.naumov.worldweather.R
 import com.naumov.worldweather.domain.model.util.WeatherClass
-import com.naumov.worldweather.domain.model.weather.DetailedDayForecast
-import com.naumov.worldweather.presentation.ui.theme.WorldWeatherTheme
+import com.naumov.worldweather.presentation.state.WeatherState
+import com.naumov.worldweather.presentation.ui.theme.LoadingIndicator
 
 
 @Composable
 fun DayForecast(
-    forecast: DetailedDayForecast,
+    state: WeatherState,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (state.isLoading) {
+        LoadingIndicator(modifier = Modifier.fillMaxSize())
+        return
+    }
+    val forecast = state.detailedDayForecast
+    val scrollState = rememberScrollState()
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(Color.Black)
     ) {
         IconButton(onClick = onBack) {
@@ -48,7 +55,10 @@ fun DayForecast(
            )
         }
         Text(
-            text = stringResource(R.string.forecast_date, forecast.date),
+            text = stringResource(
+                R.string.forecast_date,
+                forecast?.date ?: ""
+            ),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp
@@ -95,7 +105,7 @@ fun DayForecast(
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun DayForecastPreview() {
     WorldWeatherTheme {
@@ -104,4 +114,4 @@ fun DayForecastPreview() {
             onBack = {}
         )
     }
-}
+}*/

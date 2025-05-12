@@ -28,4 +28,5 @@
     <string name="millimeters">мм.рт.ст.</string>
     <string name="temperature_daily">Температура</string>
     <string name="forecast_date">Прогноз на %1$s</string>
+    <string name="select_day_warning">Выберите день из списка для отображения детального прогноза</string>
 </resources>

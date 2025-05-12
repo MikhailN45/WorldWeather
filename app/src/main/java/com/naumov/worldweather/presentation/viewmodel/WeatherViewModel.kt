@@ -34,13 +34,26 @@ class WeatherViewModel @Inject constructor(
     private val locationNameProviderUseCase: LocationNameProviderUseCase,
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
+    private var isDataLoaded = false
+
     private val _state = MutableStateFlow(WeatherState())
-    val state: StateFlow<WeatherState> = _state.asStateFlow()
+    val state: StateFlow<WeatherState?> = _state.asStateFlow()
+
+    init {
+        _state.update { it.copy(isLoading = true) }
+    }
 
     fun processEvent(event: Event) {
         when (event) {
-            is Event.RefreshData -> loadWeatherInfo()
-            is Event.WeeklyForecastDayPressed -> getDetailedDayForecast(event.dayIndex)
+            is Event.RefreshData -> {
+                if (!isDataLoaded) {
+                    isDataLoaded = true
+                    loadWeatherInfo()
+                }
+            }
+
+            is Event.WeeklyForecastDayPressed ->
+                getDetailedDayForecast(event.dayIndex)
         }
     }
 
@@ -51,7 +64,7 @@ class WeatherViewModel @Inject constructor(
             val location = locationTracker.getCurrentLocation() ?: run {
                 _state.update {
                     it.copy(
-                        isLoading = false,
+                       // isLoading = false,
                         error = FAIL_TO_GET_LOC_ERR
                     )
                 }
@@ -76,7 +89,8 @@ class WeatherViewModel @Inject constructor(
                             location = location,
                             lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
                                 ?: "",
-                            weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }.orEmpty(),
+                            weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }
+                                .orEmpty(),
                             hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }
                                 .orEmpty(),
                             isLoading = false,
@@ -126,9 +140,9 @@ class WeatherViewModel @Inject constructor(
         return (todayWeather ?: emptyList()) + (tomorrowWeather ?: emptyList())
     }
 
-    private fun getDetailedDayForecast(dayIndex: Int) {
+    private fun getDetailedDayForecast(selectedDayIndex: Int) {
         val selectedDayWeather =
-            _state.value.weatherInfo?.weatherDataPerDay?.get(dayIndex) ?: emptyList()
+            _state.value.weatherInfo?.weatherDataPerDay?.get(selectedDayIndex) ?: emptyList()
 
         val (nightData,
             morningData,

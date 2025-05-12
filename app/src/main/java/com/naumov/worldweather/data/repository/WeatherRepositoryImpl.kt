@@ -35,15 +35,15 @@ class WeatherRepositoryImpl @Inject constructor(
     }
 
     private suspend fun updateDatabase(weatherInfo: WeatherInfo) {
-        weatherDao.deleteOldWeatherData()
+       weatherDao.deleteOldWeatherData()
 
-        val (weatherEntity, hourlyWeatherDataEntities) = weatherInfo.toWeatherEntity() //Domain -> Data || Convert in Repo
+        val (weatherEntity, hourlyWeatherDataEntities) = weatherInfo.toWeatherEntity()
         val weatherEntityId = weatherDao.insertWeather(weatherEntity) //generate ID DS -
         val hourlyWeatherDataEntitiesWithId = hourlyWeatherDataEntities.map {
             it.copy(weatherInfoId = weatherEntityId.toInt())
-        } //link weather by hours to ID
+        }
 
-        weatherDao.insertHourlyWeatherData(hourlyWeatherDataEntitiesWithId) //save linked data
+        weatherDao.insertHourlyWeatherData(hourlyWeatherDataEntitiesWithId)
     }
 
     override fun fetchWeatherFlow(): Flow<WeatherInfo?> {

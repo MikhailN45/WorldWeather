@@ -70,6 +70,8 @@ dependencies {
     //Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+    implementation(libs.google.accompanist.swiperefresh)
+    implementation(libs.androidx.material)
     debugImplementation(libs.bundles.compose.debug)
 
     //NET

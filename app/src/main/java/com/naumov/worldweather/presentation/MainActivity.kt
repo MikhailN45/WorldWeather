@@ -2,30 +2,30 @@ package com.naumov.worldweather.presentation
 
 import android.Manifest
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.NavHostFragment
-import com.naumov.worldweather.R
-import com.naumov.worldweather.databinding.ActivityMainBinding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import com.naumov.worldweather.navigation.ForecastScreen
 import com.naumov.worldweather.presentation.event.Event
+import com.naumov.worldweather.presentation.ui.theme.WorldWeatherTheme
 import com.naumov.worldweather.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
-    private var _binding: ActivityMainBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: WeatherViewModel by viewModels()
+class MainActivity : ComponentActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private val viewModel: WeatherViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
 
         permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -38,15 +38,15 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        val navController =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
-                .navController
-
-        navController.navigate(R.id.mainFragment)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
+        setContent {
+            WorldWeatherTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ForecastScreen()
+                }
+            }
+        }
     }
 }
