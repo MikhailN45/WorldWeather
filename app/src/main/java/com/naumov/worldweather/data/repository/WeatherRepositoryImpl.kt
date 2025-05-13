@@ -35,7 +35,7 @@ class WeatherRepositoryImpl @Inject constructor(
     }
 
     private suspend fun updateDatabase(weatherInfo: WeatherInfo) {
-       weatherDao.deleteOldWeatherData()
+     //  weatherDao.deleteOldWeatherData()
 
         val (weatherEntity, hourlyWeatherDataEntities) = weatherInfo.toWeatherEntity()
         val weatherEntityId = weatherDao.insertWeather(weatherEntity) //generate ID DS -

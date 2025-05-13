@@ -1,4 +1,4 @@
-package com.naumov.worldweather.presentation.ui.weather_main
+package com.naumov.worldweather.presentation.ui.weather_overview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

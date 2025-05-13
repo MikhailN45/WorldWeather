@@ -19,12 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.naumov.worldweather.R
 import com.naumov.worldweather.domain.model.util.WeatherClass
 import com.naumov.worldweather.presentation.state.WeatherState
-import com.naumov.worldweather.presentation.ui.theme.LoadingIndicator
+import com.naumov.worldweather.presentation.ui.theme.WorldWeatherTheme
 
 
 @Composable
@@ -33,10 +34,6 @@ fun DayForecast(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (state.isLoading) {
-        LoadingIndicator(modifier = Modifier.fillMaxSize())
-        return
-    }
     val forecast = state.detailedDayForecast
     val scrollState = rememberScrollState()
     Column(
@@ -48,11 +45,11 @@ fun DayForecast(
             .background(Color.Black)
     ) {
         IconButton(onClick = onBack) {
-           Icon(
-               Icons.AutoMirrored.Filled.ArrowBack,
-               contentDescription = "Back",
-               tint = Color.White
-           )
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White
+            )
         }
         Text(
             text = stringResource(
@@ -105,13 +102,15 @@ fun DayForecast(
     }
 }
 
-/*@Preview
+@Preview
 @Composable
 fun DayForecastPreview() {
     WorldWeatherTheme {
         DayForecast(
-            dayForecast,
+            WeatherState(
+                detailedDayForecast = dayForecast
+            ),
             onBack = {}
         )
     }
-}*/
+}

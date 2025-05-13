@@ -34,22 +34,18 @@ class WeatherViewModel @Inject constructor(
     private val locationNameProviderUseCase: LocationNameProviderUseCase,
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
-    private var isDataLoaded = false
-
     private val _state = MutableStateFlow(WeatherState())
     val state: StateFlow<WeatherState?> = _state.asStateFlow()
 
     init {
         _state.update { it.copy(isLoading = true) }
+        loadWeatherInfo()
     }
 
     fun processEvent(event: Event) {
         when (event) {
             is Event.RefreshData -> {
-                if (!isDataLoaded) {
-                    isDataLoaded = true
-                    loadWeatherInfo()
-                }
+                loadWeatherInfo()
             }
 
             is Event.WeeklyForecastDayPressed ->
@@ -63,10 +59,7 @@ class WeatherViewModel @Inject constructor(
 
             val location = locationTracker.getCurrentLocation() ?: run {
                 _state.update {
-                    it.copy(
-                       // isLoading = false,
-                        error = FAIL_TO_GET_LOC_ERR
-                    )
+                    it.copy(error = FAIL_TO_GET_LOC_ERR)
                 }
                 return@launch
             }
@@ -78,22 +71,29 @@ class WeatherViewModel @Inject constructor(
 
             launch {
                 repository.fetchWeatherFlow().collect { weatherInfo ->
+                    if (weatherInfo == null || weatherInfo.weatherDataPerDay.isEmpty()) {
+                        return@collect
+                    }
+
                     val lastUpdateMillis = preferencesManager.getLastUpdateTime()
                     val lastUpdateTime = lastUpdateMillis?.let {
-                        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                        Instant.ofEpochMilli(it)
+                            .atZone(ZoneId.systemDefault()).toLocalDateTime()
+
                     }
+                    val formattedUpdateTime = lastUpdateTime?.format(
+                        DateTimeFormatter.ofPattern("HH:mm")
+                    ) ?: ""
 
                     _state.update {
                         it.copy(
                             weatherInfo = weatherInfo,
                             location = location,
-                            lastUpdateTime = lastUpdateTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
-                                ?: "",
-                            weeklyForecast = weatherInfo?.let { getWeeklyForecast(it) }
-                                .orEmpty(),
-                            hourlyForecast = weatherInfo?.let { getTodayHourlyForecast(it) }
-                                .orEmpty(),
+                            lastUpdateTime = formattedUpdateTime,
+                            weeklyForecast = getWeeklyForecast(weatherInfo),
+                            hourlyForecast = getTodayHourlyForecast(weatherInfo),
                             isLoading = false,
+                            isStateFilledSuccessfully = true,
                             error = null
                         )
                     }
@@ -102,7 +102,8 @@ class WeatherViewModel @Inject constructor(
 
 
             launch {
-                val result = repository.getWeatherDataFromApi(location.latitude, location.longitude)
+                val result =
+                    repository.getWeatherDataFromApi(location.latitude, location.longitude)
                 if (result is Result.Error) {
                     _state.update {
                         it.copy(
