@@ -16,5 +16,6 @@ data class WeatherState(
     val lastUpdateTime: String = "",
     val isLoading: Boolean = true,
     val isStateFilledSuccessfully: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null
 )

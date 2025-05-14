@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.naumov.worldweather.R
 import com.naumov.worldweather.presentation.ui.theme.LoadingIndicator
 import kotlinx.coroutines.launch
@@ -42,8 +41,6 @@ fun ForecastScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val coroutineScope = rememberCoroutineScope()
     val currentState = state
-    val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = currentState?.isLoading == true)
 
     LaunchedEffect(currentState?.error) {
         val error = currentState?.error
@@ -70,7 +67,7 @@ fun ForecastScreen(
                             }
                         },
                         onRefresh = { viewModel.processEvent(Event.RefreshData) },
-                        swipeRefreshState = swipeRefreshState
+                        isRefreshing = currentState.isRefreshing == true
                     )
                 }
             }

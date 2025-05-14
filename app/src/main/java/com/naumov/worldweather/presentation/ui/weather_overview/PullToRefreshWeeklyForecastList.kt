@@ -13,8 +13,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,26 +38,37 @@ import com.naumov.worldweather.presentation.ui.theme.WorldWeatherTheme
 import com.naumov.worldweather.presentation.ui.theme.grayBackground
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeeklyForecastList(
+fun PullToRefreshWeeklyForecastList(
     weeklyForecast: List<WeeklyForecast>,
     onDaySelected: (Int) -> Unit,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    val state = rememberPullToRefreshState()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier,
+        state = state
     ) {
-        itemsIndexed(weeklyForecast) { index, dayForecast ->
-            WeeklyForecastItem(
-                forecast = dayForecast,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onDaySelected(index)
-                }
-            )
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(weeklyForecast) { index, dayForecast ->
+                WeeklyForecastItem(
+                    forecast = dayForecast,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onDaySelected(index)
+                        }
+                )
+            }
         }
     }
 }

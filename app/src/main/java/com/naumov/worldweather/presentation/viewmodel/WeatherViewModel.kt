@@ -45,6 +45,7 @@ class WeatherViewModel @Inject constructor(
     fun processEvent(event: Event) {
         when (event) {
             is Event.RefreshData -> {
+                _state.update { it.copy(isRefreshing = true) }
                 loadWeatherInfo()
             }
 
@@ -94,6 +95,7 @@ class WeatherViewModel @Inject constructor(
                             hourlyForecast = getTodayHourlyForecast(weatherInfo),
                             isLoading = false,
                             isStateFilledSuccessfully = true,
+                            isRefreshing = false,
                             error = null
                         )
                     }
