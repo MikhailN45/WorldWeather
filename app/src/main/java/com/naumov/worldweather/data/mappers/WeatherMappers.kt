@@ -85,26 +85,29 @@ fun WeatherEntity.toWeatherInfo(hourlyData: List<HourlyWeatherDataEntity>): Weat
     val weatherDataPerDay = hourlyData.groupBy {
         val rawTime = LocalDateTime.parse(it.rawTime, DateTimeFormatter.ISO_DATE_TIME)
         val epochDay = rawTime.toLocalDate().toEpochDay()
-        epochDay.minus(LocalDateTime.ofEpochSecond(startTimeEpoch, 0, ZoneOffset.UTC).toLocalDate().toEpochDay()).toInt()
+        epochDay.minus(
+            LocalDateTime.ofEpochSecond(
+                startTimeEpoch, 0, ZoneOffset.UTC
+            )
+                .toLocalDate()
+                .toEpochDay()
+        ).toInt()
     }
 
+    val mappedWeatherPerDay = weatherDataPerDay.mapValues { (_, data) ->
+        data.map { it.toDayWeatherData() }
+    }
+
+    val now = LocalDateTime.now()
+    val currentHour = if (now.minute < 30) now.hour else (now.hour + 1) % 24
+    val currentDayWeatherData = mappedWeatherPerDay[0]?.find { it.time.hour == currentHour }
+
     return WeatherInfo(
-        weatherDataPerDay = weatherDataPerDay.mapValues { (_, data) ->
-            data.map {
-                DayWeatherData(
-                    time = LocalDateTime.parse(it.rawTime, DateTimeFormatter.ISO_DATE_TIME),
-                    temperature = it.temperature,
-                    humidity = it.humidity,
-                    feelsTemperature = it.feelsTemperature,
-                    pressure = it.pressure,
-                    windSpeed = it.windSpeed,
-                    weatherType = WeatherType.fromWMO(it.weatherWmoCode)
-                )
-            }
-        },
-        currentDayWeatherData = weatherDataPerDay[0]?.firstOrNull()?.toDayWeatherData()
+        weatherDataPerDay = mappedWeatherPerDay,
+        currentDayWeatherData = currentDayWeatherData
     )
 }
+
 
 fun HourlyWeatherDataEntity.toDayWeatherData(): DayWeatherData {
     return DayWeatherData(
